@@ -1,31 +1,39 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-
+import {setCategoryId} from '../redux/slices/filterSlice'
 import Categories from "../components/Categories";
 import Sort from "../components/Sort";
 import PizzaBlock from "../components/PizzaBlock";
 import Skeleton from "../components/PizzaBlock/Skeleton";
 import Pagination from "../Pagination";
+import { SearchContext} from "../App";
+
+const Home = () => {
+  const dispatch = useDispatch();
+  const {categoryId,sort} = useSelector((state) => state.filter);
+  
 
 
-const Home = ({ searchValue }) => {
+  const { searchValue } = React.useContext(SearchContext);
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [categoryId, setCategoryId] = useState(0);
-  const [currentPage,setCurrentPage] = useState(1)
-  const [sortType, setSortType] = useState({
-  
-    name: "популярности",
-    sortProperty: "rating",
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+ 
+
+  const onChangeClickCategory = (id) => {
+    console.log(id);
+    dispatch(setCategoryId(id));
+    
+  };
 
   useEffect(() => {
     setIsLoading(true);
-    const sortBy = sortType.sortProperty.replace("-", "");
-    const order = sortType.sortProperty.includes("-") ? "asc" : "desc";
+    
+    const sortBy = sort.sortProperty.replace("-", "");
+    const order = sort.sortProperty.includes("-") ? "asc" : "desc";
     const category = categoryId > 0 ? `category=${categoryId}` : "";
     const search = searchValue ? `&search=${searchValue}` : "";
-    
 
     fetch(
       `https://62e21474e8ad6b66d8530726.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
@@ -37,7 +45,7 @@ const Home = ({ searchValue }) => {
       });
 
     window.scrollTo(0, 0);
-  }, [categoryId, sortType,searchValue,currentPage]);
+  }, [categoryId, sort.sortProperty, searchValue, currentPage]);
 
   const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
@@ -50,13 +58,13 @@ const Home = ({ searchValue }) => {
       <div className="content__top">
         <Categories
           value={categoryId}
-          onChangeClickCategory={(id) => setCategoryId(id)}
+          onChangeClickCategory={onChangeClickCategory}
         />
-        <Sort value={sortType} onChangeSort={(i) => setSortType(i)} />
+        <Sort />
       </div>
       <h2 className="content__title">Все пиццы</h2>
       <div className="content__items">{isLoading ? skeletons : pizzas}</div>
-      
+
       <Pagination onChangePage={(number) => setCurrentPage(number)} />
     </div>
   );

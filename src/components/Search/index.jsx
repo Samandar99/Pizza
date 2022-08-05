@@ -5,7 +5,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-const Search = ({ searchValue, setSearchValue }) => {
+import { SearchContext } from "../../App";
+const Search = () => {
+  
+
+  const {searchValue,setSearchValue} = React.useContext(SearchContext)
+  
   return (
     <div className={styles.root}>
       <FontAwesomeIcon
