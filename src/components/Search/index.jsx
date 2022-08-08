@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./Search.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,11 +6,32 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { SearchContext } from "../../App";
-const Search = () => {
-  
+import debounce from "lodash.debounce";
 
-  const {searchValue,setSearchValue} = React.useContext(SearchContext)
+const Search = () => {
+  const [value, setValue] = useState("");
+  const { searchValue, setSearchValue } = React.useContext(SearchContext);
+  const inputRef = useRef();
+
+  const onClickClear = () => {
+    setSearchValue("");
+    setValue('');
+    inputRef.current.focus();
+  };
+
+  const updateSearchValue = useCallback(
+    debounce((str) => {
+      setSearchValue(str)
+    },1000),
+    [],
+  );
+
+  const onChangeInput = (event) => {
+    setValue(event.target.value);
+    updateSearchValue(event.target.value)
   
+  };
+
   return (
     <div className={styles.root}>
       <FontAwesomeIcon
@@ -18,18 +39,20 @@ const Search = () => {
         icon={faSearch}
       ></FontAwesomeIcon>
       <input
-        value={searchValue}
-        onChange={(event) => setSearchValue(event.target.value)}
+        ref={inputRef}
+        value={value}
+        onChange={onChangeInput}
         className={styles.input}
         type="text"
         placeholder="Поиск пиццы..."
       />
-      {searchValue && ( <FontAwesomeIcon
-        onClick={() => setSearchValue('')}
-        className={styles.clearIcon}
-        icon={faClose}
-      >
-      </FontAwesomeIcon>)}
+      {value && (
+        <FontAwesomeIcon
+          onClick={onClickClear}
+          className={styles.clearIcon}
+          icon={faClose}
+        ></FontAwesomeIcon>
+      )}
     </div>
   );
 };
